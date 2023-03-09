@@ -19,7 +19,7 @@ defmodule PaymentServer.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {PaymentServer.Application, []},
+      mod: {PaymentServer.Application, [env: Mix.env()]},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -43,7 +43,10 @@ defmodule PaymentServer.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:httpoison, "~> 2.0.0"},
+      {:plug_cowboy, "~> 2.6.0"},
+      {:plug, "~> 1.0"},
+      {:credo, "~> 1.6.7"}
     ]
   end
 

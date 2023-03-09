@@ -1,5 +1,7 @@
 import Config
 
+config :payment_server, alpha_vantage_base_url: "http://localhost:8081"
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

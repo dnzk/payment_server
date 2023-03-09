@@ -1,5 +1,7 @@
 import Config
 
+config :payment_server, alpha_vantage_base_url: "http://localhost:4001"
+
 # Configure your database
 config :payment_server, PaymentServer.Repo,
   username: "postgres",

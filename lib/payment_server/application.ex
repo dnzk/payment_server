@@ -6,8 +6,8 @@ defmodule PaymentServer.Application do
   use Application
 
   @impl true
-  def start(_type, _args) do
-    children = [
+  def start(_type, args) do
+    defaults = [
       # Start the Ecto repository
       PaymentServer.Repo,
       # Start the Telemetry supervisor
@@ -19,6 +19,12 @@ defmodule PaymentServer.Application do
       # Start a worker by calling: PaymentServer.Worker.start_link(arg)
       # {PaymentServer.Worker, arg}
     ]
+
+    children =
+      case args do
+        [env: :test] -> defaults ++ [{PaymentServer.AlphaVantageClient.MockServer, []}]
+        [_] -> defaults ++ []
+      end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
