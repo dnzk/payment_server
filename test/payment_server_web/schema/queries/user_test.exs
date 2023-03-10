@@ -93,4 +93,47 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
              }
     end
   end
+
+  describe "@wallets" do
+    @list_wallets_document """
+    query ListWallets($userId: Int!) {
+      wallets(userId: $userId) {
+        id
+        accountNumber
+        currency
+        value
+      }
+    }
+    """
+
+    test "returns all wallets that belong to a user" do
+      conn = build_conn()
+
+      response =
+        post conn, "/api",
+          query: @list_wallets_document,
+          variables: %{
+            "userId" => 1
+          }
+
+      assert json_response(response, 200) == %{
+               "data" => %{
+                 "wallets" => [
+                   %{
+                     "accountNumber" => 123_456,
+                     "currency" => "USD",
+                     "id" => 1,
+                     "value" => 1_000_000
+                   },
+                   %{
+                     "accountNumber" => 123_457,
+                     "currency" => "EUR",
+                     "id" => 2,
+                     "value" => 500_000
+                   }
+                 ]
+               }
+             }
+    end
+  end
 end

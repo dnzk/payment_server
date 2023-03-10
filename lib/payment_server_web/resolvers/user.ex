@@ -10,4 +10,8 @@ defmodule PaymentServerWeb.Resolvers.User do
   def get_user(_root, %{id: id}, _info) do
     {:ok, PaymentServer.get_user(id)}
   end
+
+  def list_wallets(_root, %{user_id: _user_id} = args, _info) do
+    {:ok, PaymentServer.list_wallets(args)}
+  end
 end

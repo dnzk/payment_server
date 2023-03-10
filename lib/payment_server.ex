@@ -82,6 +82,21 @@ defmodule PaymentServer do
   end
 
   @doc """
+  List all wallets of a user.
+
+  ## Examles
+
+      iex> [%Wallet{} | _] = PaymentServer.list_wallets(%{user_id: 1})
+
+  """
+  @spec list_wallets(%{required(:user_id) => String.t() | integer()}) :: list(Wallet.t())
+  def list_wallets(%{user_id: user_id}) do
+    Wallet
+    |> Wallet.get_by_user_id(user_id)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a wallet by combination of user_id and currency or account_number.
 
   ## Examples

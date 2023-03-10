@@ -1,4 +1,8 @@
 defmodule PaymentServerTest do
+  @moduledoc """
+  PaymentServer tests
+  """
+
   use PaymentServer.DataCase, async: true
   alias PaymentServer.Transaction
   alias PaymentServer.{Repo, User, Wallet}
@@ -205,6 +209,14 @@ defmodule PaymentServerTest do
 
     defp transactions_count(wallet_id) do
       Repo.one(from t in Transaction, where: t.wallet_id == ^wallet_id, select: count())
+    end
+  end
+
+  describe "list_wallets/1" do
+    test "returns all wallets that belong to a user" do
+      [%Wallet{user_id: user_id} | _] = PaymentServer.list_wallets(%{user_id: 1})
+
+      assert user_id == 1
     end
   end
 end
