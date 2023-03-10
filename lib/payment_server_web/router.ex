@@ -5,8 +5,14 @@ defmodule PaymentServerWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", PaymentServerWeb do
+  scope "/" do
     pipe_through :api
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+      schema: PaymentServerWeb.Schema,
+      interface: :playground
+
+    forward "/api", Absinthe.Plug, schema: PaymentServerWeb.Schema
   end
 
   # Enables LiveDashboard only for development

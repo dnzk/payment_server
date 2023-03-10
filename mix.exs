@@ -46,7 +46,9 @@ defmodule PaymentServer.MixProject do
       {:httpoison, "~> 2.0.0"},
       {:plug_cowboy, "~> 2.6.0"},
       {:plug, "~> 1.0"},
-      {:credo, "~> 1.6.7"}
+      {:credo, "~> 1.6.7"},
+      {:absinthe, "~> 1.7.1"},
+      {:absinthe_plug, "~> 1.5.8"}
     ]
   end
 
