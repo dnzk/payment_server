@@ -136,4 +136,73 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
              }
     end
   end
+
+  describe "@wallet" do
+    @get_wallet_document """
+    query GetWallet($userId: Int!, $currency: String!) {
+      wallet(userId: $userId, currency: $currency) {
+        id
+        accountNumber
+        value
+        currency
+      }
+    }
+    """
+    test "returns a wallet by user_id and currency" do
+      conn = build_conn()
+
+      response =
+        post conn, "/api",
+          query: @get_wallet_document,
+          variables: %{
+            "userId" => 1,
+            "currency" => "USD"
+          }
+
+      assert json_response(response, 200) ==
+               %{
+                 "data" => %{
+                   "wallet" => %{
+                     "id" => 1,
+                     "accountNumber" => 123_456,
+                     "currency" => "USD",
+                     "value" => 1_000_000
+                   }
+                 }
+               }
+    end
+
+    @get_wallet_document """
+    query GetWallet($accountNumber: Int!) {
+      wallet(accountNumber: $accountNumber) {
+        id
+        value
+        accountNumber
+        currency
+      }
+    }
+    """
+
+    test "returns wallet by account number" do
+      conn = build_conn()
+
+      response =
+        post conn, "/api",
+          query: @get_wallet_document,
+          variables: %{
+            "accountNumber" => 123_457
+          }
+
+      assert json_response(response, 200) == %{
+               "data" => %{
+                 "wallet" => %{
+                   "accountNumber" => 123_457,
+                   "currency" => "EUR",
+                   "id" => 2,
+                   "value" => 500_000
+                 }
+               }
+             }
+    end
+  end
 end

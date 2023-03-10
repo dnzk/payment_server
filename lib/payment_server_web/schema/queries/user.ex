@@ -23,5 +23,12 @@ defmodule PaymentServerWeb.Schema.Queries.User do
       arg :user_id, non_null(:integer)
       resolve &Resolvers.User.list_wallets/3
     end
+
+    field :wallet, :wallet do
+      arg :user_id, :integer
+      arg :currency, :string
+      arg :account_number, :integer
+      resolve &Resolvers.User.get_wallet/3
+    end
   end
 end
