@@ -219,4 +219,11 @@ defmodule PaymentServerTest do
       assert user_id == 1
     end
   end
+
+  describe "get_total_worth/1" do
+    test "gets user's total worth by the given currency" do
+      assert %{currency: "USD", value: 45_500_000} ==
+               PaymentServer.get_total_worth(%{user_id: 1, currency: "USD"})
+    end
+  end
 end

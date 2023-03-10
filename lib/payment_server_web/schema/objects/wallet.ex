@@ -13,4 +13,9 @@ defmodule PaymentServerWeb.Schema.Objects.Wallet do
     field :value, :integer
     field :currency, :string
   end
+
+  object :money do
+    field :value, :integer
+    field :currency, :string
+  end
 end

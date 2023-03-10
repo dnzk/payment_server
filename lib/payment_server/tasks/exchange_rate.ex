@@ -19,16 +19,17 @@ defmodule PaymentServer.Tasks.ExchangeRate do
     body
     |> Jason.decode!()
     |> get_in(["Realtime Currency Exchange Rate", "5. Exchange Rate"])
-    |> String.replace(".", "")
-    |> String.to_integer()
+    |> String.to_float()
+    |> Kernel.*(100)
+    |> Kernel.trunc()
   end
 
-  defp exchange_rate_url(%{from: from, to: to}) do
+  defp exchange_rate_url(%{from: from, to: to}) when is_binary(from) and is_binary(to) do
     Application.get_env(:payment_server, :alpha_vantage_base_url)
     |> Kernel.<>("/query?function=CURRENCY_EXCHANGE_RATE&from_currency=")
-    |> Kernel.<>(to_string(from))
+    |> Kernel.<>(from)
     |> Kernel.<>("&to_currency=")
-    |> Kernel.<>(to_string(to))
+    |> Kernel.<>(to)
     |> Kernel.<>("&apikey=demo")
   end
 end

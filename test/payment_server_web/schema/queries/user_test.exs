@@ -205,4 +205,36 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
              }
     end
   end
+
+  describe "@totalWorth" do
+    @get_total_worth_document """
+    query GetTotalWorth($userId: Int!, $currency: String!) {
+      total_worth(userId: $userId, currency: $currency) {
+        value
+        currency
+      }
+    }
+    """
+
+    test "returns user total worth in the supplied currency" do
+      conn = build_conn()
+
+      response =
+        post conn, "/api",
+          query: @get_total_worth_document,
+          variables: %{
+            "userId" => 1,
+            "currency" => "USD"
+          }
+
+      assert json_response(response, 200) == %{
+               "data" => %{
+                 "total_worth" => %{
+                   "currency" => "USD",
+                   "value" => 45_500_000
+                 }
+               }
+             }
+    end
+  end
 end

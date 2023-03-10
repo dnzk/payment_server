@@ -22,11 +22,11 @@ defmodule PaymentServer.AlphaVantageClient.MockController do
           "2. From_Currency Name" => "From currency name",
           "3. To_Currency Code" => to_currency,
           "4. To_Currency Name" => "To currency name",
-          "5. Exchange Rate" => "2.89",
+          "5. Exchange Rate" => "0.89",
           "6. Last Refreshed" => DateTime.to_string(DateTime.now!("Etc/UTC")),
           "7. Time Zone" => "UTC",
-          "8. Bid Price" => "2.89",
-          "9. Ask Price" => "2.89"
+          "8. Bid Price" => "0.89",
+          "9. Ask Price" => "0.89"
         }
       })
     )

@@ -124,6 +124,16 @@ defmodule PaymentServer do
     |> Repo.one()
   end
 
+  def get_total_worth(%{user_id: user_id, currency: currency}) do
+    total =
+      list_wallets(%{user_id: user_id})
+      |> Enum.reduce(0, fn wallet, acc ->
+        acc + fetch_currency_exchange(wallet.currency, currency, wallet.value)
+      end)
+
+    %{currency: currency, value: total}
+  end
+
   @doc """
   Sends money from one wallet to another.
   """
@@ -178,8 +188,13 @@ defmodule PaymentServer do
     end
   end
 
-  defp request_currency_exchange?(currency_a, currency_b) do
+  defp request_currency_exchange?(currency_a, currency_b)
+       when is_binary(currency_a) and is_binary(currency_b) do
     String.upcase(currency_a) != String.upcase(currency_b)
+  end
+
+  defp fetch_currency_exchange(from, to, value) when from == to do
+    value
   end
 
   defp fetch_currency_exchange(from, to, value) do

@@ -18,4 +18,8 @@ defmodule PaymentServerWeb.Resolvers.User do
   def get_wallet(_root, args, _info) do
     {:ok, PaymentServer.get_wallet(args)}
   end
+
+  def get_total_worth(_root, %{user_id: _user_id, currency: _currency} = args, _info) do
+    {:ok, PaymentServer.get_total_worth(args)}
+  end
 end
