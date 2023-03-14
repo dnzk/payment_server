@@ -26,4 +26,8 @@ defmodule PaymentServerWeb.Resolvers.User do
   def create_user(_root, %{name: _name, email: _email} = args, _info) do
     PaymentServer.create_user(args)
   end
+
+  def create_wallet(_root, %{user_id: _user_id, value: _value, currency: _currency} = args, _info) do
+    PaymentServer.create_wallet(args)
+  end
 end

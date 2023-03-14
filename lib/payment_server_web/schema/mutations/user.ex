@@ -14,5 +14,13 @@ defmodule PaymentServerWeb.Schema.Mutations.User do
       arg :email, non_null(:string)
       resolve &Resolvers.User.create_user/3
     end
+
+    @desc "Creates a wallet"
+    field :create_wallet, :wallet do
+      arg :user_id, non_null(:integer)
+      arg :value, non_null(:integer)
+      arg :currency, non_null(:string)
+      resolve &Resolvers.User.create_wallet/3
+    end
   end
 end
