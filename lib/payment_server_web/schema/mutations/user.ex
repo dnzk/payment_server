@@ -22,5 +22,13 @@ defmodule PaymentServerWeb.Schema.Mutations.User do
       arg :currency, non_null(:string)
       resolve &Resolvers.User.create_wallet/3
     end
+
+    # @desc "Sends money"
+    field :send_money, :updated_wallets do
+      arg :sender_account_number, :integer
+      arg :recipient_account_number, :integer
+      arg :value, :integer
+      resolve &Resolvers.User.send_money/3
+    end
   end
 end

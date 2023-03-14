@@ -14,4 +14,9 @@ defmodule PaymentServerWeb.Schema.Objects.User do
     @desc "User email"
     field :email, :string
   end
+
+  object :updated_wallets do
+    field :sender, :wallet
+    field :recipient, :wallet
+  end
 end
