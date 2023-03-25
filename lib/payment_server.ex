@@ -215,7 +215,10 @@ defmodule PaymentServer do
 
       create_wallet_transaction!(:outbound, updated_sender, value, recipient.id)
 
-      %{sender: updated_sender, recipient: updated_recipient}
+      %{
+        sender: updated_sender,
+        recipient: updated_recipient
+      }
     end)
   end
 
@@ -234,7 +237,10 @@ defmodule PaymentServer do
 
       create_wallet_transaction!(:outbound, updated_sender, sent_value, recipient.id)
 
-      %{sender: updated_sender, recipient: updated_recipient}
+      %{
+        sender: updated_sender,
+        recipient: updated_recipient
+      }
     end)
   end
 
