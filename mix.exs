@@ -48,7 +48,8 @@ defmodule PaymentServer.MixProject do
       {:plug, "~> 1.0"},
       {:credo, "~> 1.6.7"},
       {:absinthe, "~> 1.7.1"},
-      {:absinthe_plug, "~> 1.5.8"}
+      {:absinthe_plug, "~> 1.5.8"},
+      {:absinthe_phoenix, "~> 2.0.2"}
     ]
   end
 

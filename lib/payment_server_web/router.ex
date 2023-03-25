@@ -10,7 +10,8 @@ defmodule PaymentServerWeb.Router do
 
     forward "/graphiql", Absinthe.Plug.GraphiQL,
       schema: PaymentServerWeb.Schema,
-      interface: :playground
+      interface: :playground,
+      socket: PaymentServerWeb.UserSocket
 
     forward "/api", Absinthe.Plug, schema: PaymentServerWeb.Schema
   end
