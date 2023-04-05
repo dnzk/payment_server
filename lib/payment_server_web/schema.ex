@@ -2,6 +2,7 @@ defmodule PaymentServerWeb.Schema do
   @moduledoc """
   Schema
   """
+  alias PaymentServer.ExchangeRateSubscriptionServer
 
   use Absinthe.Schema
 
@@ -45,6 +46,20 @@ defmodule PaymentServerWeb.Schema do
       end
 
       resolve &PaymentServerWeb.Resolvers.User.get_total_worth/3
+    end
+
+    field :exchange_rate_updated, :currency_exchange do
+      arg :from_currency, non_null(:string)
+      arg :to_currency, non_null(:string)
+
+      config fn %{from_currency: from, to_currency: to}, _ ->
+        ExchangeRateSubscriptionServer.request_exchange_rate(%{
+          from: from,
+          to: to
+        })
+
+        {:ok, topic: "#{from}/#{to}"}
+      end
     end
   end
 end

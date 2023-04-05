@@ -202,7 +202,14 @@ defmodule PaymentServer do
     |> ExchangeRate.request_exchange_rate()
     |> ExchangeRate.get_exchange_rate_response()
     |> ExchangeRate.get_exchange_rate()
+    |> clean_exchange_value()
     |> Kernel.*(value)
+  end
+
+  defp clean_exchange_value(value) when is_float(value) do
+    value
+    |> Kernel.*(100)
+    |> Kernel.trunc()
   end
 
   defp update_wallets_and_add_transactions(%Wallet{} = sender, %Wallet{} = recipient, value) do

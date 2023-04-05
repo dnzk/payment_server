@@ -199,6 +199,8 @@ defmodule PaymentServerTest do
         ExchangeRate.request_exchange_rate(%{from: "USD", to: "EUR"})
         |> ExchangeRate.get_exchange_rate_response()
         |> ExchangeRate.get_exchange_rate()
+        |> Kernel.*(100)
+        |> Kernel.trunc()
 
       updated_wallet_1 = PaymentServer.get_wallet(%{user_id: 1, currency: "USD"})
       updated_wallet_2 = PaymentServer.get_wallet(%{user_id: 2, currency: "EUR"})

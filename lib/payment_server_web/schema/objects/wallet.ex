@@ -18,4 +18,10 @@ defmodule PaymentServerWeb.Schema.Objects.Wallet do
     field :value, :integer
     field :currency, :string
   end
+
+  object :currency_exchange do
+    field :from_currency, :string
+    field :to_currency, :string
+    field :exchange_rate, :float
+  end
 end

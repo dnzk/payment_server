@@ -2,7 +2,6 @@ defmodule PaymentServer.Tasks.ExchangeRate do
   @moduledoc """
   ExhangeRate Task module
   """
-
   def request_exchange_rate(%{from: _from, to: _to} = params) do
     Task.async(fn ->
       params
@@ -20,8 +19,6 @@ defmodule PaymentServer.Tasks.ExchangeRate do
     |> Jason.decode!()
     |> get_in(["Realtime Currency Exchange Rate", "5. Exchange Rate"])
     |> String.to_float()
-    |> Kernel.*(100)
-    |> Kernel.trunc()
   end
 
   defp exchange_rate_url(%{from: from, to: to}) when is_binary(from) and is_binary(to) do
