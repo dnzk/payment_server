@@ -16,6 +16,10 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     GenServer.cast(__MODULE__, {:request_exchange_rate, args})
   end
 
+  def request_all_exchange_rate() do
+    GenServer.cast(__MODULE__, {:request_all_exchange_rate})
+  end
+
   def get_latest_exchange_rate(key) do
     GenServer.call(__MODULE__, {:get_latest_exchange_rate, key})
   end
@@ -33,6 +37,21 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   def handle_cast({:request_exchange_rate, %{from: _from, to: _to} = args}, state) do
     maybe_run_interval_request(state, args)
     {:noreply, Map.update(state, keyify(args), nil, & &1)}
+  end
+
+  @impl true
+  def handle_cast({:request_all_exchange_rate}, state) do
+    pairs = PaymentServer.get_currency_pairs()
+    for p <- pairs, do: maybe_run_interval_request(state, p)
+
+    state =
+      pairs
+      |> Enum.reduce(%{}, fn p, acc ->
+        Map.update(acc, keyify(p), nil, & &1)
+      end)
+      |> Map.merge(state)
+
+    {:noreply, state}
   end
 
   @impl true
@@ -90,6 +109,12 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     args
     |> keyify()
     |> ExchangeRateSubscriptionServer.update_exchange_rate(exchange_rate)
+
+    Absinthe.Subscription.publish(
+      PaymentServerWeb.Endpoint,
+      %{from_currency: from, to_currency: to, exchange_rate: exchange_rate},
+      all_exchange_rate_updated: "*/*"
+    )
 
     Absinthe.Subscription.publish(
       PaymentServerWeb.Endpoint,

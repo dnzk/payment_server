@@ -188,6 +188,29 @@ defmodule PaymentServer do
     end
   end
 
+  def get_currency_pairs() do
+    Wallet
+    |> Repo.all()
+    |> Stream.map(& &1.currency)
+    |> Enum.uniq()
+    |> transform_to_pairs()
+  end
+
+  defp transform_to_pairs(currencies) when is_list(currencies) do
+    transform_to_pairs(currencies, currencies, [])
+  end
+
+  defp transform_to_pairs([hd | tl], currencies, result) do
+    pairs =
+      currencies
+      |> Stream.filter(&(&1 !== hd))
+      |> Enum.map(&%{from: hd, to: &1})
+
+    transform_to_pairs(tl, currencies, [pairs | result])
+  end
+
+  defp transform_to_pairs([], _currencies, result), do: List.flatten(result)
+
   defp request_currency_exchange?(currency_a, currency_b)
        when is_binary(currency_a) and is_binary(currency_b) do
     String.upcase(currency_a) != String.upcase(currency_b)

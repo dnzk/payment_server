@@ -61,5 +61,12 @@ defmodule PaymentServerWeb.Schema do
         {:ok, topic: "#{from}/#{to}"}
       end
     end
+
+    field :all_exchange_rate_updated, :currency_exchange do
+      config fn _, _ ->
+        ExchangeRateSubscriptionServer.request_all_exchange_rate()
+        {:ok, topic: "*/*"}
+      end
+    end
   end
 end
