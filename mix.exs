@@ -66,8 +66,7 @@ defmodule PaymentServer.MixProject do
       "ecto.test.reset": [
         "ecto.drop --quiet",
         "ecto.create --quiet",
-        "ecto.migrate --quiet",
-        "run priv/repo/seeds.exs"
+        "ecto.migrate --quiet"
       ],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.test.reset", "test"]
