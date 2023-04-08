@@ -39,7 +39,10 @@ defmodule PaymentServerWeb.Schema.Subscriptions.UserTest do
     test "sends with send money", %{socket: socket} do
       ref =
         push_doc(socket, @total_worth_changed_document,
-          variables: %{"userId" => 1, "currency" => "USD"}
+          variables: %{
+            "userId" => 1,
+            "currency" => "USD"
+          }
         )
 
       assert_reply ref, :ok, %{subscriptionId: subscription_id}
@@ -103,10 +106,24 @@ defmodule PaymentServerWeb.Schema.Subscriptions.UserTest do
 
       assert_reply ref, :ok, reply
 
-      assert %{data: %{"createWallet" => %{"currency" => "CAD", "value" => 500_000}}} = reply
+      assert %{
+               data: %{
+                 "createWallet" => %{
+                   "currency" => "CAD",
+                   "value" => 500_000
+                 }
+               }
+             } = reply
 
       expected = %{
-        result: %{data: %{"totalWorthChanged" => %{"currency" => "USD", "value" => 90_000_000}}},
+        result: %{
+          data: %{
+            "totalWorthChanged" => %{
+              "currency" => "USD",
+              "value" => 90_000_000
+            }
+          }
+        },
         subscriptionId: subscription_id
       }
 
