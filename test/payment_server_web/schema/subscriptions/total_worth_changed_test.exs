@@ -1,8 +1,8 @@
-defmodule PaymentServerWeb.Schema.Subscriptions.UserTest do
+defmodule PaymentServerWeb.Schema.Subscriptions.TotalWorthChangedTest do
   @moduledoc """
   Subscriptions test
   """
-  use PaymentServerWeb.SubscriptionCase, async: true
+  use PaymentServerWeb.SubscriptionCase
   use PaymentServer.DataCase
 
   @total_worth_changed_document """
