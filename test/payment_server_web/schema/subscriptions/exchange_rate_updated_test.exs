@@ -41,7 +41,7 @@ defmodule PaymentServerWeb.Schema.Subscriptions.ExchangeRateUpdatedTest do
       }
 
       assert_push "subscription:data", push, 1100
-      assert expected == push
+      assert expected === push
     end
   end
 end
