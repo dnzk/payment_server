@@ -16,7 +16,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     GenServer.cast(__MODULE__, {:request_exchange_rate, args})
   end
 
-  def request_all_exchange_rate() do
+  def request_all_exchange_rate do
     GenServer.cast(__MODULE__, {:request_all_exchange_rate})
   end
 
@@ -94,7 +94,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
 
     case value do
       {:ok, last_value} ->
-        if last_value == exchange_rate do
+        if last_value === exchange_rate do
           nil
         else
           publish_absinthe_event(exchange_rate, args, keyify(args))

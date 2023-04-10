@@ -61,7 +61,7 @@ defmodule PaymentServer.Wallet do
     from q in query, where: q.account_number == ^account_number
   end
 
-  defp generate_account_number() do
+  defp generate_account_number do
     number =
       1..9
       |> Enum.map_join(fn _ ->

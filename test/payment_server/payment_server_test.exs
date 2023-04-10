@@ -70,19 +70,19 @@ defmodule PaymentServerTest do
 
       assert length(Repo.all(user_1_wallets)) == 2
 
-      PaymentServer.create_wallet(%{user_id: 1, value: 5_000_00, currency: "IDR"})
+      PaymentServer.create_wallet(%{user_id: 1, value: 500_000, currency: "IDR"})
 
       assert length(Repo.all(user_1_wallets)) == 3
     end
 
     test "prevents creation of invalid currency format" do
       assert {:error, %Ecto.Changeset{}} =
-               PaymentServer.create_wallet(%{user_id: 1, value: 400_00, currency: "UIOP"})
+               PaymentServer.create_wallet(%{user_id: 1, value: 40_000, currency: "UIOP"})
     end
 
     test "makes sure currency is uppercased" do
       assert {:ok, %Wallet{} = wallet} =
-               PaymentServer.create_wallet(%{user_id: 1, value: 5000_00, currency: "jpy"})
+               PaymentServer.create_wallet(%{user_id: 1, value: 500_000, currency: "jpy"})
 
       assert wallet.currency == "JPY"
     end
@@ -92,12 +92,12 @@ defmodule PaymentServerTest do
                PaymentServer.create_wallet(%{user_id: 2, value: 5_000_00, currency: "USD"})
 
       assert {:error, _} =
-               PaymentServer.create_wallet(%{user_id: 2, value: 10_000_00, currency: "USD"})
+               PaymentServer.create_wallet(%{user_id: 2, value: 1_000_000, currency: "USD"})
     end
 
     test "adds account number to wallet" do
       assert {:ok, %Wallet{} = wallet} =
-               PaymentServer.create_wallet(%{user_id: 3, value: 5_000_00, currency: "USD"})
+               PaymentServer.create_wallet(%{user_id: 3, value: 500_000, currency: "USD"})
 
       assert wallet.account_number != nil
       assert is_integer(wallet.account_number) == true
@@ -105,7 +105,7 @@ defmodule PaymentServerTest do
 
     test "prevents creation of wallet for nonexistent user" do
       assert {:error, _} =
-               PaymentServer.create_wallet(%{user_id: 11, value: 5_000_00, currency: "JPY"})
+               PaymentServer.create_wallet(%{user_id: 11, value: 500_000, currency: "JPY"})
     end
   end
 

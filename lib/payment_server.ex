@@ -34,7 +34,7 @@ defmodule PaymentServer do
 
   """
   @spec list_users :: [User.t()] | []
-  def list_users() do
+  def list_users do
     Repo.all(User)
   end
 
@@ -126,7 +126,8 @@ defmodule PaymentServer do
 
   def get_total_worth(%{user_id: user_id, currency: currency}) do
     total =
-      list_wallets(%{user_id: user_id})
+      %{user_id: user_id}
+      |> list_wallets()
       |> Enum.reduce(0, fn wallet, acc ->
         acc + fetch_currency_exchange(wallet.currency, currency, wallet.value)
       end)
@@ -188,7 +189,7 @@ defmodule PaymentServer do
     end
   end
 
-  def get_currency_pairs() do
+  def get_currency_pairs do
     Wallet
     |> Repo.all()
     |> Stream.map(& &1.currency)
@@ -213,7 +214,7 @@ defmodule PaymentServer do
 
   defp request_currency_exchange?(currency_a, currency_b)
        when is_binary(currency_a) and is_binary(currency_b) do
-    String.upcase(currency_a) != String.upcase(currency_b)
+    String.upcase(currency_a) !== String.upcase(currency_b)
   end
 
   defp fetch_currency_exchange(from, to, value) when from == to do

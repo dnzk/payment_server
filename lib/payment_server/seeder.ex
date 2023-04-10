@@ -1,7 +1,10 @@
 defmodule PaymentServer.Seeder do
+  @moduledoc """
+  Database seeder
+  """
   alias PaymentServer.{Repo, User}
 
-  def run() do
+  def run do
     user_1 =
       Repo.insert!(%User{
         name: "User 1",
@@ -22,17 +25,17 @@ defmodule PaymentServer.Seeder do
 
     user_1_wallet_1 =
       user_1
-      |> Ecto.build_assoc(:wallets, value: 10_000_00, currency: "USD", account_number: 123_456)
+      |> Ecto.build_assoc(:wallets, value: 1_000_000, currency: "USD", account_number: 123_456)
       |> Repo.insert!()
 
     user_1_wallet_2 =
       user_1
-      |> Ecto.build_assoc(:wallets, value: 5_000_00, currency: "EUR", account_number: 123_457)
+      |> Ecto.build_assoc(:wallets, value: 500_000, currency: "EUR", account_number: 123_457)
       |> Repo.insert!()
 
     user_2_wallet_1 =
       user_2
-      |> Ecto.build_assoc(:wallets, value: 8_500_00, currency: "EUR", account_number: 333_222)
+      |> Ecto.build_assoc(:wallets, value: 850_000, currency: "EUR", account_number: 333_222)
       |> Repo.insert!()
 
     user_1_wallet_1

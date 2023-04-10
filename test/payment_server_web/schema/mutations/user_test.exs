@@ -88,7 +88,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
           variables: %{
             "senderAccountNumber" => wallet_1.account_number,
             "recipientAccountNumber" => wallet_2.account_number,
-            "value" => 50000
+            "value" => 50_000
           }
 
       assert json_response(response, 200) ==
