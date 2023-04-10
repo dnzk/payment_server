@@ -20,7 +20,7 @@ if System.get_env("PHX_SERVER") do
   config :payment_server, PaymentServerWeb.Endpoint, server: true
 end
 
-if config_env() == :prod do
+if config_env() === :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

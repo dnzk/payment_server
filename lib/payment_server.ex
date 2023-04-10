@@ -149,7 +149,7 @@ defmodule PaymentServer do
         recipient_account_number: recipient_account_number,
         value: _value
       })
-      when sender_account_number == recipient_account_number,
+      when sender_account_number === recipient_account_number,
       do: {:error, "Cannot send money to the same wallet"}
 
   def send_money(%{sender_account_number: _, recipient_account_number: _, value: value})
@@ -217,7 +217,7 @@ defmodule PaymentServer do
     String.upcase(currency_a) !== String.upcase(currency_b)
   end
 
-  defp fetch_currency_exchange(from, to, value) when from == to do
+  defp fetch_currency_exchange(from, to, value) when from === to do
     value
   end
 

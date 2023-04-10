@@ -20,7 +20,7 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
       conn = build_conn()
       response = get conn, "/api", query: @list_users_document
 
-      assert json_response(response, 200) == %{
+      assert json_response(response, 200) === %{
                "data" => %{
                  "users" => [
                    %{
@@ -65,7 +65,7 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
             "id" => 1
           }
 
-      assert json_response(response, 200) == %{
+      assert json_response(response, 200) === %{
                "data" => %{
                  "user" => %{
                    "id" => 1,
@@ -86,7 +86,7 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
             "id" => 5
           }
 
-      assert json_response(response, 200) == %{
+      assert json_response(response, 200) === %{
                "data" => %{
                  "user" => nil
                }
@@ -116,7 +116,7 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
             "userId" => 1
           }
 
-      assert json_response(response, 200) == %{
+      assert json_response(response, 200) === %{
                "data" => %{
                  "wallets" => [
                    %{
@@ -193,7 +193,7 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
             "accountNumber" => 123_457
           }
 
-      assert json_response(response, 200) == %{
+      assert json_response(response, 200) === %{
                "data" => %{
                  "wallet" => %{
                    "accountNumber" => 123_457,
@@ -227,7 +227,7 @@ defmodule PaymentServerWeb.Schema.Queries.UserTest do
             "currency" => "USD"
           }
 
-      assert json_response(response, 200) == %{
+      assert json_response(response, 200) === %{
                "data" => %{
                  "total_worth" => %{
                    "currency" => "USD",

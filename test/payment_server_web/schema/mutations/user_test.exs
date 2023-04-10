@@ -20,7 +20,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
       user_name = "New User"
       conn = build_conn()
 
-      assert nil == Repo.get_by(User, name: user_name)
+      assert is_nil(Repo.get_by(User, name: user_name))
 
       post conn, "/api",
         query: @create_user_document,
@@ -30,7 +30,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
         }
 
       assert %{name: name} = Repo.get_by(User, name: user_name)
-      assert name == user_name
+      assert name === user_name
     end
   end
 
@@ -46,7 +46,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
     """
 
     test "creates wallet with valid params" do
-      assert nil == PaymentServer.get_wallet(%{user_id: 2, currency: "JPY"})
+      assert is_nil(PaymentServer.get_wallet(%{user_id: 2, currency: "JPY"}))
       conn = build_conn()
 
       post conn, "/api",
@@ -91,7 +91,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
             "value" => 50_000
           }
 
-      assert json_response(response, 200) ==
+      assert json_response(response, 200) ===
                %{
                  "data" => %{
                    "sendMoney" => %{

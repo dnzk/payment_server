@@ -22,7 +22,8 @@ defmodule PaymentServer.Tasks.ExchangeRate do
   end
 
   defp exchange_rate_url(%{from: from, to: to}) when is_binary(from) and is_binary(to) do
-    Application.get_env(:payment_server, :alpha_vantage_base_url)
+    :payment_server
+    |> Application.get_env(:alpha_vantage_base_url)
     |> Kernel.<>("/query?function=CURRENCY_EXCHANGE_RATE&from_currency=")
     |> Kernel.<>(from)
     |> Kernel.<>("&to_currency=")

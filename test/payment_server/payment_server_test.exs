@@ -14,14 +14,14 @@ defmodule PaymentServerTest do
     @user_name "User zero"
     @user_email "user_zero@example.com"
     test "creates user with valid params" do
-      assert nil == Repo.get_by(User, name: @user_name)
+      assert is_nil(Repo.get_by(User, name: @user_name))
 
       PaymentServer.create_user(%{
         name: @user_name,
         email: @user_email
       })
 
-      assert Repo.get_by(User, name: @user_name) != nil
+      assert !is_nil(Repo.get_by(User, name: @user_name))
     end
 
     test "does not create user with invalid email" do
@@ -37,7 +37,7 @@ defmodule PaymentServerTest do
     test "lists all users" do
       users = PaymentServer.list_users()
 
-      assert length(users) == 3
+      assert length(users) === 3
 
       PaymentServer.create_user(%{
         name: "Extra user",
@@ -46,7 +46,7 @@ defmodule PaymentServerTest do
 
       users = PaymentServer.list_users()
 
-      assert length(users) == 4
+      assert length(users) === 4
     end
   end
 
@@ -56,7 +56,7 @@ defmodule PaymentServerTest do
     end
 
     test "returns nil for unexisting user id" do
-      assert nil == PaymentServer.get_user(100)
+      assert is_nil(PaymentServer.get_user(100))
     end
   end
 
@@ -68,11 +68,11 @@ defmodule PaymentServerTest do
           on: w.user_id == u.id,
           where: u.id == 1
 
-      assert length(Repo.all(user_1_wallets)) == 2
+      assert length(Repo.all(user_1_wallets)) === 2
 
       PaymentServer.create_wallet(%{user_id: 1, value: 500_000, currency: "IDR"})
 
-      assert length(Repo.all(user_1_wallets)) == 3
+      assert length(Repo.all(user_1_wallets)) === 3
     end
 
     test "prevents creation of invalid currency format" do
@@ -84,7 +84,7 @@ defmodule PaymentServerTest do
       assert {:ok, %Wallet{} = wallet} =
                PaymentServer.create_wallet(%{user_id: 1, value: 500_000, currency: "jpy"})
 
-      assert wallet.currency == "JPY"
+      assert wallet.currency === "JPY"
     end
 
     test "prevents creation of duplicate currency per user" do
@@ -99,8 +99,8 @@ defmodule PaymentServerTest do
       assert {:ok, %Wallet{} = wallet} =
                PaymentServer.create_wallet(%{user_id: 3, value: 500_000, currency: "USD"})
 
-      assert wallet.account_number != nil
-      assert is_integer(wallet.account_number) == true
+      assert !is_nil(wallet.account_number)
+      assert is_integer(wallet.account_number)
     end
 
     test "prevents creation of wallet for nonexistent user" do
@@ -112,17 +112,17 @@ defmodule PaymentServerTest do
   describe "get_wallet/1" do
     test "gets wallet by user_id and currency" do
       assert wallet = PaymentServer.get_wallet(%{user_id: 1, currency: "USD"})
-      assert wallet.currency == "USD"
+      assert wallet.currency === "USD"
     end
 
     test "gets wallet by account_number" do
       wallet = Repo.get(Wallet, 1)
       fetched_wallet = PaymentServer.get_wallet(%{account_number: wallet.account_number})
-      assert fetched_wallet.id == wallet.id
+      assert fetched_wallet.id === wallet.id
     end
 
     test "returns nil for nonexisting wallet" do
-      assert nil == PaymentServer.get_wallet(%{user_id: 1, currency: "IDR"})
+      assert is_nil(PaymentServer.get_wallet(%{user_id: 1, currency: "IDR"}))
     end
   end
 
@@ -174,11 +174,11 @@ defmodule PaymentServerTest do
                  value: value
                })
 
-      assert sender.value == wallet_1.value - value
-      assert recipient.value == wallet_2.value + value
+      assert sender.value === wallet_1.value - value
+      assert recipient.value === wallet_2.value + value
 
-      assert transactions_count(wallet_1.id) == wallet_1_transactions_count + 1
-      assert transactions_count(wallet_2.id) == wallet_2_transactions_count + 1
+      assert transactions_count(wallet_1.id) === wallet_1_transactions_count + 1
+      assert transactions_count(wallet_2.id) === wallet_2_transactions_count + 1
     end
 
     test "converts currency from sender to recipient before sending when sender and recipient have different currency" do
@@ -205,8 +205,8 @@ defmodule PaymentServerTest do
       updated_wallet_1 = PaymentServer.get_wallet(%{user_id: 1, currency: "USD"})
       updated_wallet_2 = PaymentServer.get_wallet(%{user_id: 2, currency: "EUR"})
 
-      assert updated_wallet_1.value == wallet_1.value - value
-      assert updated_wallet_2.value == wallet_2.value + value * exchange_rate
+      assert updated_wallet_1.value === wallet_1.value - value
+      assert updated_wallet_2.value === wallet_2.value + value * exchange_rate
     end
 
     defp transactions_count(wallet_id) do
@@ -218,13 +218,13 @@ defmodule PaymentServerTest do
     test "returns all wallets that belong to a user" do
       [%Wallet{user_id: user_id} | _] = PaymentServer.list_wallets(%{user_id: 1})
 
-      assert user_id == 1
+      assert user_id === 1
     end
   end
 
   describe "get_total_worth/1" do
     test "gets user's total worth by the given currency" do
-      assert %{currency: "USD", value: 45_500_000} ==
+      assert %{currency: "USD", value: 45_500_000} ===
                PaymentServer.get_total_worth(%{user_id: 1, currency: "USD"})
     end
   end
