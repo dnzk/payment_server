@@ -128,7 +128,7 @@ defmodule PaymentServerWeb.Schema.Subscriptions.TotalWorthChangedTest do
       }
 
       assert_push "subscription:data", push
-      assert expected == push
+      assert expected === push
     end
   end
 end

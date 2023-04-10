@@ -196,7 +196,8 @@ defmodule PaymentServerTest do
       # The constant exchange rate is only made possible by
       # the unchanging response from the mock server
       exchange_rate =
-        ExchangeRate.request_exchange_rate(%{from: "USD", to: "EUR"})
+        %{from: "USD", to: "EUR"}
+        |> ExchangeRate.request_exchange_rate()
         |> ExchangeRate.get_exchange_rate_response()
         |> ExchangeRate.get_exchange_rate()
         |> Kernel.*(100)
