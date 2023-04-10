@@ -1,4 +1,7 @@
 defmodule PaymentServer.AlphaVantageClient.MockServer do
+  @moduledoc """
+  Alpha vantage mock server
+  """
   use GenServer
   alias PaymentServer.AlphaVantageClient.MockController
 

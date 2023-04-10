@@ -1,4 +1,8 @@
 defmodule PaymentServer.Transaction do
+  @moduledoc """
+  Transaction schema
+  """
+
   alias __MODULE__
   alias PaymentServer.Wallet
   use Ecto.Schema

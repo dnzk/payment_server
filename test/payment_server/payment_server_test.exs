@@ -89,7 +89,7 @@ defmodule PaymentServerTest do
 
     test "prevents creation of duplicate currency per user" do
       assert {:ok, _} =
-               PaymentServer.create_wallet(%{user_id: 2, value: 5_000_00, currency: "USD"})
+               PaymentServer.create_wallet(%{user_id: 2, value: 500_000, currency: "USD"})
 
       assert {:error, _} =
                PaymentServer.create_wallet(%{user_id: 2, value: 1_000_000, currency: "USD"})
@@ -134,7 +134,7 @@ defmodule PaymentServerTest do
                PaymentServer.send_money(%{
                  sender_account_number: wallet.account_number,
                  recipient_account_number: wallet.account_number,
-                 value: 5_000_00
+                 value: 500_000
                })
     end
 
@@ -165,7 +165,7 @@ defmodule PaymentServerTest do
 
       wallet_2_transactions_count = transactions_count(wallet_2.id)
 
-      value = 5_000_00
+      value = 500_000
 
       assert {:ok, %{sender: sender, recipient: recipient}} =
                PaymentServer.send_money(%{
@@ -184,7 +184,7 @@ defmodule PaymentServerTest do
     test "converts currency from sender to recipient before sending when sender and recipient have different currency" do
       wallet_1 = PaymentServer.get_wallet(%{user_id: 1, currency: "USD"})
       wallet_2 = PaymentServer.get_wallet(%{user_id: 2, currency: "EUR"})
-      value = 500_00
+      value = 50_000
 
       PaymentServer.send_money(%{
         sender_account_number: wallet_1.account_number,
