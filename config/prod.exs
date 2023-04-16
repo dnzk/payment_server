@@ -2,6 +2,8 @@ import Config
 
 config :payment_server, alpha_vantage_base_url: "https://alphavantage.co"
 
+config :payment_server, alpha_vantage_api_key: "demo"
+
 # For production, don't forget to configure the url host
 # to something meaningful, Phoenix uses this information
 # when generating URLs.
