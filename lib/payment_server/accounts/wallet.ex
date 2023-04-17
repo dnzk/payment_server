@@ -1,10 +1,11 @@
-defmodule PaymentServer.Wallet do
+defmodule PaymentServer.Accounts.Wallet do
   @moduledoc """
   Wallet schema
   """
 
   alias __MODULE__
-  alias PaymentServer.{Transaction, User, Repo}
+  alias PaymentServer.Repo
+  alias PaymentServer.Accounts.{User, Transaction}
   use Ecto.Schema
 
   import Ecto.{Changeset, Query}

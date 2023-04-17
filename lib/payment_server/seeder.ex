@@ -2,7 +2,8 @@ defmodule PaymentServer.Seeder do
   @moduledoc """
   Database seeder
   """
-  alias PaymentServer.{Repo, User}
+  alias PaymentServer.{Repo}
+  alias PaymentServer.Accounts.{User}
 
   def run do
     user_1 =

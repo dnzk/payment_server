@@ -41,7 +41,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
 
   @impl true
   def handle_cast({:request_all_exchange_rate}, state) do
-    pairs = PaymentServer.get_currency_pairs()
+    pairs = PaymentServer.Accounts.get_currency_pairs()
     for p <- pairs, do: maybe_run_interval_request(state, p)
 
     state =

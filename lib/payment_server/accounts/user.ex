@@ -1,10 +1,10 @@
-defmodule PaymentServer.User do
+defmodule PaymentServer.Accounts.User do
   @moduledoc """
   User schema
   """
 
   alias __MODULE__
-  alias PaymentServer.Wallet
+  alias PaymentServer.Accounts.Wallet
   use Ecto.Schema
 
   import Ecto.Changeset

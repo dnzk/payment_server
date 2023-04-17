@@ -3,7 +3,8 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
   User mutations test
   """
   use PaymentServerWeb.ConnCase, async: true
-  alias PaymentServer.{Repo, User}
+  alias PaymentServer.{Repo, Accounts}
+  alias Accounts.User
 
   describe "@create_user" do
     @create_user_document """
@@ -46,7 +47,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
     """
 
     test "creates wallet with valid params" do
-      assert is_nil(PaymentServer.get_wallet(%{user_id: 2, currency: "JPY"}))
+      assert is_nil(Accounts.get_wallet(%{user_id: 2, currency: "JPY"}))
       conn = build_conn()
 
       post conn, "/api",
@@ -57,7 +58,7 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
           "value" => 300_000
         }
 
-      assert %{currency: _, value: _} = PaymentServer.get_wallet(%{user_id: 2, currency: "JPY"})
+      assert %{currency: _, value: _} = Accounts.get_wallet(%{user_id: 2, currency: "JPY"})
     end
   end
 
@@ -79,8 +80,8 @@ defmodule PaymentServerWeb.Schema.Mutations.UserTest do
 
     test "sends money with valid params" do
       conn = build_conn()
-      wallet_1 = PaymentServer.get_wallet(%{user_id: 1, currency: "USD"})
-      wallet_2 = PaymentServer.get_wallet(%{user_id: 2, currency: "EUR"})
+      wallet_1 = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
+      wallet_2 = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
 
       response =
         post conn, "/api",

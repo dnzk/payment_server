@@ -3,19 +3,21 @@ defmodule PaymentServerWeb.Resolvers.User do
   User resolvers
   """
 
+  alias PaymentServer.Accounts
+
   def list_users(_root, _args, _info) do
-    {:ok, PaymentServer.list_users()}
+    {:ok, Accounts.list_users()}
   end
 
   def get_user(_root, %{id: id}, _info) do
-    {:ok, PaymentServer.get_user(id)}
+    {:ok, Accounts.get_user(id)}
   end
 
   def get_total_worth(_root, %{user_id: _user_id, currency: _currency} = args, _info) do
-    {:ok, PaymentServer.get_total_worth(args)}
+    {:ok, Accounts.get_total_worth(args)}
   end
 
   def create_user(_root, %{name: _name, email: _email} = args, _info) do
-    PaymentServer.create_user(args)
+    Accounts.create_user(args)
   end
 end
