@@ -106,9 +106,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   end
 
   defp publish_absinthe_event(exchange_rate, %{from: from, to: to} = args, topic) do
-    args
-    |> keyify()
-    |> ExchangeRateSubscriptionServer.update_exchange_rate(exchange_rate)
+    spawn_update_exchange_rate(args, exchange_rate)
 
     Absinthe.Subscription.publish(
       PaymentServerWeb.Endpoint,
@@ -121,6 +119,14 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
       %{from_currency: from, to_currency: to, exchange_rate: exchange_rate},
       exchange_rate_updated: topic
     )
+  end
+
+  defp spawn_update_exchange_rate(%{from: _from, to: _to} = args, exchange_rate) do
+    spawn(fn ->
+      args
+      |> keyify()
+      |> ExchangeRateSubscriptionServer.update_exchange_rate(exchange_rate)
+    end)
   end
 
   defp keyify(%{from: from, to: to}) do
