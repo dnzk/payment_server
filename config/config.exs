@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :payment_server, test: Mix.env() === :test
+
 config :payment_server,
   ecto_repos: [PaymentServer.Repo]
 

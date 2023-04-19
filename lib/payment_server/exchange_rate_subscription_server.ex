@@ -8,6 +8,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   alias __MODULE__
   use GenServer
 
+  # Client API
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{}, name: ExchangeRateSubscriptionServer)
   end
@@ -16,7 +17,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     GenServer.cast(__MODULE__, {:request_exchange_rate, args})
   end
 
-  def request_all_exchange_rate do
+  def request_all_exchange_rate() do
     GenServer.cast(__MODULE__, {:request_all_exchange_rate})
   end
 
@@ -28,6 +29,15 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     GenServer.cast(__MODULE__, {:update_exchange_rate, %{key: key, rate: rate}})
   end
 
+  def reset() do
+    if Application.get_env(:payment_server, :test, false) do
+      GenServer.cast(__MODULE__, {:reset_state})
+    else
+      raise "Incorrect function access"
+    end
+  end
+
+  # Server handlers
   @impl true
   def init(state) do
     {:ok, state}
@@ -57,6 +67,11 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   @impl true
   def handle_cast({:update_exchange_rate, %{key: key, rate: rate}}, state) do
     {:noreply, Map.update(state, key, nil, fn _ -> rate end)}
+  end
+
+  @impl true
+  def handle_cast({:reset_state}, _state) do
+    {:noreply, %{}}
   end
 
   @impl true
@@ -111,12 +126,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     Absinthe.Subscription.publish(
       PaymentServerWeb.Endpoint,
       %{from_currency: from, to_currency: to, exchange_rate: exchange_rate},
-      all_exchange_rate_updated: "*/*"
-    )
-
-    Absinthe.Subscription.publish(
-      PaymentServerWeb.Endpoint,
-      %{from_currency: from, to_currency: to, exchange_rate: exchange_rate},
+      all_exchange_rate_updated: "*/*",
       exchange_rate_updated: topic
     )
   end
