@@ -2,7 +2,7 @@ defmodule PaymentServer.Accounts do
   @moduledoc """
   PaymentServer context
   """
-  alias PaymentServer.{Repo}
+  alias PaymentServer.Repo
   alias PaymentServer.Accounts.{User, Wallet, Transaction}
   alias PaymentServer.Tasks.ExchangeRate
 

@@ -25,7 +25,7 @@ defmodule PaymentServer.Tasks.ExchangeRate do
     "#{alpha_vantage_base_url()}/query?function=CURRENCY_EXCHANGE_RATE&from_currency=#{from}&to_currency=#{to}&apikey=#{alpha_vantage_api_key()}"
   end
 
-  defp alpha_vantage_base_url(), do: Application.get_env(:payment_server, :alpha_vantage_base_url)
+  defp alpha_vantage_base_url, do: Application.get_env(:payment_server, :alpha_vantage_base_url)
 
-  defp alpha_vantage_api_key(), do: Application.get_env(:payment_server, :alpha_vantage_api_key)
+  defp alpha_vantage_api_key, do: Application.get_env(:payment_server, :alpha_vantage_api_key)
 end

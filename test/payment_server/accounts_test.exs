@@ -4,7 +4,7 @@ defmodule PaymentServerAccountsTest do
   """
 
   use PaymentServer.DataCase, async: true
-  alias PaymentServer.{Repo}
+  alias PaymentServer.Repo
   alias PaymentServer.Accounts
   alias Accounts.{User, Wallet, Transaction}
   alias PaymentServer.Tasks.ExchangeRate
@@ -64,10 +64,11 @@ defmodule PaymentServerAccountsTest do
   describe "create_wallet/1" do
     test "creates a wallet" do
       user_1_wallets =
-        from u in User,
+        from(u in User,
           join: w in Wallet,
           on: w.user_id == u.id,
           where: u.id == 1
+        )
 
       assert length(Repo.all(user_1_wallets)) === 2
 
@@ -210,7 +211,7 @@ defmodule PaymentServerAccountsTest do
     end
 
     defp transactions_count(wallet_id) do
-      Repo.one(from t in Transaction, where: t.wallet_id == ^wallet_id, select: count())
+      Repo.one(from(t in Transaction, where: t.wallet_id == ^wallet_id, select: count()))
     end
   end
 

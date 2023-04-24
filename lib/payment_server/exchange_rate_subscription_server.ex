@@ -17,7 +17,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     GenServer.cast(__MODULE__, {:request_exchange_rate, args})
   end
 
-  def request_all_exchange_rate() do
+  def request_all_exchange_rate do
     GenServer.cast(__MODULE__, {:request_all_exchange_rate})
   end
 
@@ -29,7 +29,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     GenServer.cast(__MODULE__, {:update_exchange_rate, %{key: key, rate: rate}})
   end
 
-  def reset() do
+  def reset do
     if Application.get_env(:payment_server, :test, false) do
       GenServer.cast(__MODULE__, {:reset_state})
     else
