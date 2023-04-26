@@ -86,7 +86,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   end
 
   defp run_interval_request(args) do
-    spawn(fn ->
+    Task.async(fn ->
       :timer.apply_interval(1000, ExchangeRateSubscriptionServer, :request_and_emit, [args])
 
       :timer.sleep(:infinity)
@@ -132,7 +132,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   end
 
   defp spawn_update_exchange_rate(%{from: _from, to: _to} = args, exchange_rate) do
-    spawn(fn ->
+    Task.async(fn ->
       args
       |> keyify()
       |> ExchangeRateSubscriptionServer.update_exchange_rate(exchange_rate)
