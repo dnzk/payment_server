@@ -5,6 +5,7 @@ defmodule PaymentServer.Accounts do
   alias PaymentServer.Repo
   alias PaymentServer.Accounts.{User, Wallet, Transaction}
   alias PaymentServer.Tasks.ExchangeRate
+  require Logger
 
   @doc """
   Creates a user
@@ -125,12 +126,25 @@ defmodule PaymentServer.Accounts do
     |> Repo.one()
   end
 
+  @spec get_total_worth(%{:currency => String.t(), :user_id => integer(), optional(any) => any}) ::
+          %{currency: any, value: any}
   def get_total_worth(%{user_id: user_id, currency: currency}) do
     total =
       %{user_id: user_id}
       |> list_wallets()
       |> Enum.reduce(0, fn wallet, acc ->
-        acc + fetch_currency_exchange(wallet.currency, currency, wallet.value)
+        case request_currency_exchange?(wallet.currency, currency) do
+          true ->
+            with {:ok, rate} <- request_rate(wallet.currency, currency),
+                 moving_value <- calculate_sent_value(rate, wallet.value) do
+              acc + moving_value
+            else
+              _ -> acc
+            end
+
+          false ->
+            acc + wallet.value
+        end
       end)
 
     %{currency: currency, value: total}
@@ -157,39 +171,30 @@ defmodule PaymentServer.Accounts do
       when not is_integer(value),
       do: {:error, "Value must be integer"}
 
-  def send_money(%{
-        sender_account_number: sender_account_number,
-        recipient_account_number: recipient_account_number,
-        value: value
-      }) do
-    with sender_wallet <- get_wallet(%{account_number: sender_account_number}),
-         recipient_wallet <- get_wallet(%{account_number: recipient_account_number}) do
-      case request_currency_exchange?(sender_wallet.currency, recipient_wallet.currency) do
-        true ->
-          moving_value =
-            fetch_currency_exchange(
-              sender_wallet.currency,
-              recipient_wallet.currency,
-              value
-            )
+  def send_money(
+        %{
+          sender_account_number: _sender_account_number,
+          recipient_account_number: _recipient_account_number,
+          value: sent_value
+        } = args
+      ) do
+    case prepare_wallets_for_sending(args) do
+      {:ok, wallets} ->
+        %{
+          sender_wallet: %{currency: sender_currency},
+          recipient_wallet: %{currency: recipient_currency}
+        } = wallets
 
-          update_wallets_and_add_transactions(
-            sender_wallet,
-            recipient_wallet,
-            value,
-            moving_value
-          )
+        sender_currency
+        |> request_currency_exchange?(recipient_currency)
+        |> attempt_send_money(Map.put(wallets, :value, sent_value))
 
-        false ->
-          update_wallets_and_add_transactions(
-            sender_wallet,
-            recipient_wallet,
-            value
-          )
-      end
+      _ ->
+        {:error, "Error while sending"}
     end
   end
 
+  @spec get_currency_pairs :: list
   def get_currency_pairs do
     Wallet
     |> Repo.all()
@@ -218,23 +223,69 @@ defmodule PaymentServer.Accounts do
     String.upcase(currency_a) !== String.upcase(currency_b)
   end
 
-  defp fetch_currency_exchange(from, to, value) when from === to do
-    value
+  defp request_rate(from, to) do
+    with req <- ExchangeRate.request_exchange_rate(%{from: from, to: to}),
+         resp <- ExchangeRate.get_exchange_rate_response(req),
+         {:ok, rate} <- ExchangeRate.get_exchange_rate(resp) do
+      {:ok, rate}
+    else
+      err ->
+        Logger.error(inspect(err))
+        {:error, "Error while requesting rate"}
+    end
   end
 
-  defp fetch_currency_exchange(from, to, value) do
-    %{from: from, to: to}
-    |> ExchangeRate.request_exchange_rate()
-    |> ExchangeRate.get_exchange_rate_response()
-    |> ExchangeRate.get_exchange_rate()
-    |> clean_exchange_value()
+  defp calculate_sent_value(rate, value) do
+    rate
+    |> Kernel.*(100)
+    |> Kernel.trunc()
     |> Kernel.*(value)
   end
 
-  defp clean_exchange_value(value) when is_float(value) do
-    value
-    |> Kernel.*(100)
-    |> Kernel.trunc()
+  defp prepare_wallets_for_sending(%{
+         sender_account_number: sender_account_number,
+         recipient_account_number: recipient_account_number
+       }) do
+    with sender_wallet when not is_nil(sender_wallet) <-
+           get_wallet(%{account_number: sender_account_number}),
+         recipient_wallet when not is_nil(recipient_wallet) <-
+           get_wallet(%{account_number: recipient_account_number}) do
+      {:ok, %{sender_wallet: sender_wallet, recipient_wallet: recipient_wallet}}
+    else
+      _ -> {:error, "Wallet does not exist"}
+    end
+  end
+
+  defp attempt_send_money(
+         false = _do_request,
+         %{
+           sender_wallet: sender_wallet,
+           recipient_wallet: recipient_wallet,
+           value: value
+         }
+       ) do
+    update_wallets_and_add_transactions(sender_wallet, recipient_wallet, value)
+  end
+
+  defp attempt_send_money(
+         true = _do_request,
+         %{
+           sender_wallet: sender_wallet,
+           recipient_wallet: recipient_wallet,
+           value: sent_value
+         }
+       ) do
+    with {:ok, rate} <- request_rate(sender_wallet.currency, recipient_wallet.currency),
+         received_value <- calculate_sent_value(rate, sent_value) do
+      update_wallets_and_add_transactions(
+        sender_wallet,
+        recipient_wallet,
+        sent_value,
+        received_value
+      )
+    else
+      _ -> {:error, "Error while sending"}
+    end
   end
 
   defp update_wallets_and_add_transactions(%Wallet{} = sender, %Wallet{} = recipient, value) do

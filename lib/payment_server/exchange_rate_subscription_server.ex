@@ -7,6 +7,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   alias PaymentServer.Tasks.ExchangeRate
   alias __MODULE__
   use GenServer
+  require Logger
 
   # Client API
   def start_link(_) do
@@ -94,11 +95,14 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   end
 
   def request_and_emit(args) do
-    args
-    |> ExchangeRate.request_exchange_rate()
-    |> ExchangeRate.get_exchange_rate_response()
-    |> ExchangeRate.get_exchange_rate()
-    |> maybe_publish_absinthe_event(args)
+    with req <- ExchangeRate.request_exchange_rate(args),
+         response <- ExchangeRate.get_exchange_rate_response(req),
+         {:ok, rate} <- ExchangeRate.get_exchange_rate(response) do
+      maybe_publish_absinthe_event(rate, args)
+    else
+      err ->
+        Logger.error(inspect(err))
+    end
   end
 
   defp maybe_publish_absinthe_event(exchange_rate, %{from: _from, to: _to} = args) do

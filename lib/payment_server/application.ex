@@ -17,7 +17,8 @@ defmodule PaymentServer.Application do
       # Start the Endpoint (http/https)
       PaymentServerWeb.Endpoint,
       {Absinthe.Subscription, PaymentServerWeb.Endpoint},
-      PaymentServer.ExchangeRateSubscriptionServer
+      PaymentServer.ExchangeRateSubscriptionServer,
+      {Task.Supervisor, name: PaymentServer.TaskSupervisor}
       # Start a worker by calling: PaymentServer.Worker.start_link(arg)
       # {PaymentServer.Worker, arg}
     ]

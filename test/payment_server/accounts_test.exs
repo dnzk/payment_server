@@ -195,11 +195,14 @@ defmodule PaymentServerAccountsTest do
       # NOTE:
       # The constant exchange rate is only made possible by
       # the unchanging response from the mock server
-      exchange_rate =
+      {:ok, rate} =
         %{from: "USD", to: "EUR"}
         |> ExchangeRate.request_exchange_rate()
         |> ExchangeRate.get_exchange_rate_response()
         |> ExchangeRate.get_exchange_rate()
+
+      exchange_rate =
+        rate
         |> Kernel.*(100)
         |> Kernel.trunc()
 
