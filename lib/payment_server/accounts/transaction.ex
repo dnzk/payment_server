@@ -8,6 +8,8 @@ defmodule PaymentServer.Accounts.Transaction do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t :: %Transaction{}
+
   schema "transactions" do
     field :type, Ecto.Enum, values: [:created, :inbound, :outbound]
     field :counterparty, :integer

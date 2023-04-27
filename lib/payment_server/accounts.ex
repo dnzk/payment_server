@@ -133,18 +133,10 @@ defmodule PaymentServer.Accounts do
       %{user_id: user_id}
       |> list_wallets()
       |> Enum.reduce(0, fn wallet, acc ->
-        case request_currency_exchange?(wallet.currency, currency) do
-          true ->
-            with {:ok, rate} <- request_rate(wallet.currency, currency),
-                 moving_value <- calculate_sent_value(rate, wallet.value) do
-              acc + moving_value
-            else
-              _ -> acc
-            end
-
-          false ->
-            acc + wallet.value
-        end
+        wallet.currency
+        |> request_currency_exchange?(currency)
+        |> maybe_convert_currency(wallet.currency, currency, wallet.value)
+        |> Kernel.+(acc)
       end)
 
     %{currency: currency, value: total}
@@ -181,13 +173,13 @@ defmodule PaymentServer.Accounts do
     case prepare_wallets_for_sending(args) do
       {:ok, wallets} ->
         %{
-          sender_wallet: %{currency: sender_currency},
-          recipient_wallet: %{currency: recipient_currency}
+          sender_wallet: %{currency: sender_currency} = sender_wallet,
+          recipient_wallet: %{currency: recipient_currency} = recipient_wallet
         } = wallets
 
         sender_currency
         |> request_currency_exchange?(recipient_currency)
-        |> attempt_send_money(Map.put(wallets, :value, sent_value))
+        |> attempt_send_money(sender_wallet, recipient_wallet, sent_value)
 
       _ ->
         {:error, "Error while sending"}
@@ -202,6 +194,8 @@ defmodule PaymentServer.Accounts do
     |> Enum.uniq()
     |> transform_to_pairs()
   end
+
+  ## Helper functions
 
   defp transform_to_pairs(currencies) when is_list(currencies) do
     transform_to_pairs(currencies, currencies, [])
@@ -235,7 +229,7 @@ defmodule PaymentServer.Accounts do
     end
   end
 
-  defp calculate_sent_value(rate, value) do
+  defp format_sent_value(rate, value) do
     rate
     |> Kernel.*(100)
     |> Kernel.trunc()
@@ -256,35 +250,42 @@ defmodule PaymentServer.Accounts do
     end
   end
 
+  defp calculate_exchange(from_currency, to_currency, value) do
+    case request_rate(from_currency, to_currency) do
+      {:ok, rate} ->
+        {:ok, format_sent_value(rate, value)}
+
+      _ ->
+        {:error, "Error requesting exchange rate"}
+    end
+  end
+
   defp attempt_send_money(
-         false = _do_request,
-         %{
-           sender_wallet: sender_wallet,
-           recipient_wallet: recipient_wallet,
-           value: value
-         }
+         false,
+         sender_wallet,
+         recipient_wallet,
+         value
        ) do
     update_wallets_and_add_transactions(sender_wallet, recipient_wallet, value)
   end
 
   defp attempt_send_money(
-         true = _do_request,
-         %{
-           sender_wallet: sender_wallet,
-           recipient_wallet: recipient_wallet,
-           value: sent_value
-         }
+         true,
+         sender_wallet,
+         recipient_wallet,
+         sent_value
        ) do
-    with {:ok, rate} <- request_rate(sender_wallet.currency, recipient_wallet.currency),
-         received_value <- calculate_sent_value(rate, sent_value) do
-      update_wallets_and_add_transactions(
-        sender_wallet,
-        recipient_wallet,
-        sent_value,
-        received_value
-      )
-    else
-      _ -> {:error, "Error while sending"}
+    case calculate_exchange(sender_wallet.currency, recipient_wallet.currency, sent_value) do
+      {:ok, received_value} ->
+        update_wallets_and_add_transactions(
+          sender_wallet,
+          recipient_wallet,
+          sent_value,
+          received_value
+        )
+
+      _ ->
+        {:error, "Error while sending"}
     end
   end
 
@@ -337,5 +338,19 @@ defmodule PaymentServer.Accounts do
       counterparty: counterparty
     })
     |> Repo.insert!()
+  end
+
+  defp maybe_convert_currency(true, from, to, value) do
+    case calculate_exchange(from, to, value) do
+      {:ok, converted_value} ->
+        converted_value
+
+      _ ->
+        value
+    end
+  end
+
+  defp maybe_convert_currency(false, _from, _to, value) do
+    value
   end
 end
