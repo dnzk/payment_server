@@ -12,7 +12,8 @@ defmodule PaymentServer.Tasks.ExchangeRateTest do
       to = "JPY"
 
       response =
-        ExchangeRate.request_exchange_rate(%{from: from, to: to})
+        %{from: from, to: to}
+        |> ExchangeRate.request_exchange_rate()
         |> Task.await()
 
       assert {:ok, %{request: %{url: url}}} = response
@@ -27,7 +28,8 @@ defmodule PaymentServer.Tasks.ExchangeRateTest do
   describe "&get_exchange_rate/1" do
     test "parses request body" do
       rate_response =
-        ExchangeRate.request_exchange_rate(%{from: "USD", to: "JPY"})
+        %{from: "USD", to: "JPY"}
+        |> ExchangeRate.request_exchange_rate()
         |> ExchangeRate.get_exchange_rate_response()
         |> ExchangeRate.get_exchange_rate()
 
