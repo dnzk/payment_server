@@ -35,9 +35,9 @@ defmodule PaymentServer.Accounts do
       iex> [%User{} | _] = PaymentServer.list_users()
 
   """
-  @spec list_users :: [User.t()] | []
+  @spec list_users :: {:ok, [User.t()] | []}
   def list_users do
-    Repo.all(User)
+    {:ok, Repo.all(User)}
   end
 
   @doc """
@@ -50,9 +50,9 @@ defmodule PaymentServer.Accounts do
       1
 
   """
-  @spec get_user(String.t() | integer()) :: User.t() | nil
+  @spec get_user(String.t() | integer()) :: {:ok, User.t()} | {:ok, nil}
   def get_user(id) do
-    Repo.get(User, id)
+    {:ok, Repo.get(User, id)}
   end
 
   @doc """
@@ -72,10 +72,10 @@ defmodule PaymentServer.Accounts do
         }) :: {:ok, Wallet.t()} | {:error, String.t()} | {:error, Ecto.Changeset.t()}
   def create_wallet(%{user_id: user_id, value: value, currency: currency}) do
     case get_user(user_id) do
-      nil ->
+      {:ok, nil} ->
         {:error, "User does not exist"}
 
-      user ->
+      {:ok, user} ->
         user
         |> Ecto.build_assoc(:wallets)
         |> Wallet.create_changeset(%{value: value, currency: currency})
@@ -91,11 +91,12 @@ defmodule PaymentServer.Accounts do
       iex> [%Wallet{} | _] = PaymentServer.list_wallets(%{user_id: 1})
 
   """
-  @spec list_wallets(%{required(:user_id) => String.t() | integer()}) :: list(Wallet.t())
+  @spec list_wallets(%{required(:user_id) => String.t() | integer()}) :: {:ok, list(Wallet.t())}
   def list_wallets(%{user_id: user_id}) do
-    Wallet
-    |> Wallet.get_by_user_id(user_id)
-    |> Repo.all()
+    {:ok,
+     Wallet
+     |> Wallet.get_by_user_id(user_id)
+     |> Repo.all()}
   end
 
   @doc """
@@ -111,27 +112,34 @@ defmodule PaymentServer.Accounts do
   @spec get_wallet(%{
           required(:user_id) => String.t() | integer(),
           required(:currency) => String.t()
-        }) :: Wallet.t() | nil
+        }) :: {:ok, Wallet.t()} | {:ok, nil}
   def get_wallet(%{user_id: user_id, currency: currency}) do
-    Wallet
-    |> Wallet.get_by_user_id(user_id)
-    |> Wallet.get_by_currency(String.upcase(currency))
-    |> Repo.one()
+    wallet =
+      Wallet
+      |> Wallet.get_by_user_id(user_id)
+      |> Wallet.get_by_currency(String.upcase(currency))
+      |> Repo.one()
+
+    {:ok, wallet}
   end
 
-  @spec get_wallet(%{required(:account_number) => integer()}) :: Wallet.t() | nil
+  @spec get_wallet(%{required(:account_number) => integer()}) :: {:ok, Wallet.t()} | {:ok, nil}
   def get_wallet(%{account_number: account_number}) do
-    Wallet
-    |> Wallet.get_by_account_number(account_number)
-    |> Repo.one()
+    wallet =
+      Wallet
+      |> Wallet.get_by_account_number(account_number)
+      |> Repo.one()
+
+    {:ok, wallet}
   end
 
   @spec get_total_worth(%{:currency => String.t(), :user_id => integer(), optional(any) => any}) ::
-          %{currency: any, value: any}
+          {:ok, %{currency: String.t(), value: float()}}
   def get_total_worth(%{user_id: user_id, currency: currency}) do
     total =
       %{user_id: user_id}
       |> list_wallets()
+      |> Kernel.elem(1)
       |> Enum.reduce(0, fn wallet, acc ->
         wallet.currency
         |> request_currency_exchange?(currency)
@@ -139,7 +147,7 @@ defmodule PaymentServer.Accounts do
         |> Kernel.+(acc)
       end)
 
-    %{currency: currency, value: total}
+    {:ok, %{currency: currency, value: total}}
   end
 
   @doc """
@@ -240,9 +248,9 @@ defmodule PaymentServer.Accounts do
          sender_account_number: sender_account_number,
          recipient_account_number: recipient_account_number
        }) do
-    with sender_wallet when not is_nil(sender_wallet) <-
+    with {:ok, sender_wallet} when not is_nil(sender_wallet) <-
            get_wallet(%{account_number: sender_account_number}),
-         recipient_wallet when not is_nil(recipient_wallet) <-
+         {:ok, recipient_wallet} when not is_nil(recipient_wallet) <-
            get_wallet(%{account_number: recipient_account_number}) do
       {:ok, %{sender_wallet: sender_wallet, recipient_wallet: recipient_wallet}}
     else

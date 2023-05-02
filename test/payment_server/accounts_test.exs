@@ -36,7 +36,7 @@ defmodule PaymentServerAccountsTest do
 
   describe "list_users/0" do
     test "lists all users" do
-      users = Accounts.list_users()
+      {:ok, users} = Accounts.list_users()
 
       assert length(users) === 3
 
@@ -45,7 +45,7 @@ defmodule PaymentServerAccountsTest do
         email: "extra_user@example.com"
       })
 
-      users = Accounts.list_users()
+      {:ok, users} = Accounts.list_users()
 
       assert length(users) === 4
     end
@@ -53,11 +53,11 @@ defmodule PaymentServerAccountsTest do
 
   describe "get_user/1" do
     test "gets a single user" do
-      assert %User{id: 1} = Accounts.get_user(1)
+      assert {:ok, %User{id: 1}} = Accounts.get_user(1)
     end
 
     test "returns nil for unexisting user id" do
-      assert is_nil(Accounts.get_user(100))
+      assert {:ok, nil} = Accounts.get_user(100)
     end
   end
 
@@ -111,18 +111,19 @@ defmodule PaymentServerAccountsTest do
 
   describe "get_wallet/1" do
     test "gets wallet by user_id and currency" do
-      assert wallet = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
+      assert {:ok, wallet} = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
       assert wallet.currency === "USD"
     end
 
     test "gets wallet by account_number" do
       wallet = Repo.get(Wallet, 1)
-      fetched_wallet = Accounts.get_wallet(%{account_number: wallet.account_number})
+      {:ok, fetched_wallet} = Accounts.get_wallet(%{account_number: wallet.account_number})
       assert fetched_wallet.id === wallet.id
     end
 
     test "returns nil for nonexisting wallet" do
-      assert is_nil(Accounts.get_wallet(%{user_id: 1, currency: "IDR"}))
+      {:ok, wallet} = Accounts.get_wallet(%{user_id: 1, currency: "IDR"})
+      assert is_nil(wallet)
     end
   end
 
@@ -158,8 +159,8 @@ defmodule PaymentServerAccountsTest do
     end
 
     test "sends money when sender and recipient have the same currency" do
-      wallet_1 = Accounts.get_wallet(%{user_id: 1, currency: "EUR"})
-      wallet_2 = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
+      {:ok, wallet_1} = Accounts.get_wallet(%{user_id: 1, currency: "EUR"})
+      {:ok, wallet_2} = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
 
       wallet_1_transactions_count = transactions_count(wallet_1.id)
 
@@ -182,8 +183,8 @@ defmodule PaymentServerAccountsTest do
     end
 
     test "converts currency from sender to recipient before sending when sender and recipient have different currency" do
-      wallet_1 = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
-      wallet_2 = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
+      {:ok, wallet_1} = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
+      {:ok, wallet_2} = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
       value = 50_000
 
       Accounts.send_money(%{
@@ -206,8 +207,8 @@ defmodule PaymentServerAccountsTest do
         |> Kernel.*(100)
         |> Kernel.trunc()
 
-      updated_wallet_1 = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
-      updated_wallet_2 = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
+      {:ok, updated_wallet_1} = Accounts.get_wallet(%{user_id: 1, currency: "USD"})
+      {:ok, updated_wallet_2} = Accounts.get_wallet(%{user_id: 2, currency: "EUR"})
 
       assert updated_wallet_1.value === wallet_1.value - value
       assert updated_wallet_2.value === wallet_2.value + value * exchange_rate
@@ -220,7 +221,7 @@ defmodule PaymentServerAccountsTest do
 
   describe "list_wallets/1" do
     test "returns all wallets that belong to a user" do
-      [%Wallet{user_id: user_id} | _] = Accounts.list_wallets(%{user_id: 1})
+      {:ok, [%Wallet{user_id: user_id} | _]} = Accounts.list_wallets(%{user_id: 1})
 
       assert user_id === 1
     end
@@ -228,7 +229,7 @@ defmodule PaymentServerAccountsTest do
 
   describe "get_total_worth/1" do
     test "gets user's total worth by the given currency" do
-      assert %{currency: "USD", value: 45_500_000} ===
+      assert {:ok, %{currency: "USD", value: 45_500_000}} ===
                Accounts.get_total_worth(%{user_id: 1, currency: "USD"})
     end
   end
