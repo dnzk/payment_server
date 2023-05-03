@@ -81,17 +81,21 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   end
 
   defp maybe_run_interval_request(state, %{from: _from, to: _to} = args) do
-    if !Map.has_key?(state, keyify(args)) do
-      run_interval_request(args)
-    end
+    if not_already_running_interval_request(state, args), do: run_interval_request(args)
+  end
+
+  defp not_already_running_interval_request(state, %{from: _from, to: _to} = args) do
+    !Map.has_key?(state, keyify(args))
   end
 
   defp run_interval_request(args) do
-    Task.async(fn ->
-      :timer.apply_interval(1000, ExchangeRateSubscriptionServer, :request_and_emit, [args])
-
-      :timer.sleep(:infinity)
-    end)
+    Task.Supervisor.start_child(
+      PaymentServer.TaskSupervisor,
+      fn ->
+        request_and_emit(args)
+        run_interval_request(args)
+      end
+    )
   end
 
   def request_and_emit(args) do
