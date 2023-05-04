@@ -16,7 +16,6 @@ defmodule PaymentServerWeb.Schema.Mutations.Wallet do
       resolve &Resolvers.Wallet.create_wallet/3
     end
 
-    # @desc "Sends money"
     @desc "Sends money from a wallet to another wallet"
     field :send_money, :updated_wallets do
       arg :sender_account_number, :integer

@@ -14,11 +14,6 @@ defmodule PaymentServer.ExchangeRateSubscriptionServerTest do
   end
 
   describe "&request_exchange_rate/2" do
-    # test "sends a cast message to the server" do
-    #   args = %{from: "USD", to: "JPY"}
-    #   ExchangeRateSubscriptionServer.request_exchange_rate(args)
-    # end
-
     test "adds supplied key into state" do
       s = :sys.get_state(ExchangeRateSubscriptionServer)
       assert %{} === s

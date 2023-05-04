@@ -113,7 +113,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     value =
       args
       |> keyify
-      |> ExchangeRateSubscriptionServer.get_latest_exchange_rate()
+      |> get_latest_exchange_rate()
 
     case value do
       {:ok, last_value} ->
@@ -143,7 +143,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
     Task.async(fn ->
       args
       |> keyify()
-      |> ExchangeRateSubscriptionServer.update_exchange_rate(exchange_rate)
+      |> update_exchange_rate(exchange_rate)
     end)
   end
 
