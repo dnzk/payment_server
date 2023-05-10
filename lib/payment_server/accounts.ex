@@ -71,15 +71,15 @@ defmodule PaymentServer.Accounts do
           required(:currency) => integer()
         }) :: {:ok, Wallet.t()} | {:error, String.t()} | {:error, Ecto.Changeset.t()}
   def create_wallet(%{user_id: user_id, value: value, currency: currency}) do
-    case get_user(user_id) do
-      {:ok, nil} ->
-        {:error, "User does not exist"}
+    with {:ok, user} when not is_nil(user) <- get_user(user_id),
+         {:ok, wallet} <- create_wallet_for_user(user, value, currency) do
+      {:ok, wallet}
+    else
+      {:error, error} ->
+        {:error, error}
 
-      {:ok, user} ->
-        user
-        |> Ecto.build_assoc(:wallets)
-        |> Wallet.create_changeset(%{value: value, currency: currency})
-        |> Repo.insert()
+      _ ->
+        {:error, "Error when creating wallet"}
     end
   end
 
@@ -204,6 +204,13 @@ defmodule PaymentServer.Accounts do
   end
 
   ## Helper functions
+
+  defp create_wallet_for_user(%User{} = user, value, currency) do
+    user
+    |> Ecto.build_assoc(:wallets)
+    |> Wallet.create_changeset(%{value: value, currency: currency})
+    |> Repo.insert()
+  end
 
   defp transform_to_pairs(currencies) when is_list(currencies) do
     transform_to_pairs(currencies, currencies, [])
