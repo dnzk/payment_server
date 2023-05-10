@@ -19,20 +19,18 @@ defmodule PaymentServer.Tasks.ExchangeRate do
     Task.await(request)
   end
 
+  @exchange_rate_key ["Realtime Currency Exchange Rate", "5. Exchange Rate"]
+
   @spec get_exchange_rate({:error, HTTPoison.Response.t()} | {:ok, HTTPoison.Response.t()}) ::
           {:error, <<_::72>> | Jason.DecodeError.t()} | {:ok, float}
   def get_exchange_rate({:ok, %HTTPoison.Response{status_code: 200, body: body} = _response}) do
-    case Jason.decode(body) do
-      {:ok, decoded_body} ->
-        rate =
-          decoded_body
-          |> get_in(["Realtime Currency Exchange Rate", "5. Exchange Rate"])
-          |> String.to_float()
-
-        {:ok, rate}
-
-      failure ->
-        failure
+    with {:ok, decoded_body} <- Jason.decode(body),
+         exchange_rate when not is_nil(exchange_rate) <-
+           get_in(decoded_body, @exchange_rate_key) do
+      {:ok, String.to_float(exchange_rate)}
+    else
+      _ ->
+        {:error, "API error"}
     end
   end
 

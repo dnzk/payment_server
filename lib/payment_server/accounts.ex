@@ -190,7 +190,7 @@ defmodule PaymentServer.Accounts do
         |> attempt_send_money(sender_wallet, recipient_wallet, sent_value)
 
       _ ->
-        {:error, "Error while sending"}
+        {:error, "Error while sending money"}
     end
   end
 
@@ -293,24 +293,26 @@ defmodule PaymentServer.Accounts do
         )
 
       _ ->
-        {:error, "Error while sending"}
+        {:error, "Error while sending money"}
     end
   end
 
   defp update_wallets_and_add_transactions(%Wallet{} = sender, %Wallet{} = recipient, value) do
     Repo.transaction(fn ->
-      updated_recipient = Repo.update!(Wallet.update_value(:recipient, recipient, value))
-
-      updated_sender = Repo.update!(Wallet.update_value(:sender, sender, value))
-
-      create_wallet_transaction!(:inbound, updated_recipient, value, sender.id)
-
-      create_wallet_transaction!(:outbound, updated_sender, value, recipient.id)
-
-      %{
-        sender: updated_sender,
-        recipient: updated_recipient
-      }
+      with {:ok, updated_recipient} <- update_wallet_value(:recipient, recipient, value),
+           {:ok, updated_sender} <- update_wallet_value(:sender, sender, value),
+           {:ok, _recipient_transaction} <-
+             create_wallet_transaction(:inbound, updated_recipient, value, sender.id),
+           {:ok, _sender_transaction} <-
+             create_wallet_transaction(:outbound, updated_sender, value, recipient.id) do
+        %{
+          sender: updated_sender,
+          recipient: updated_recipient
+        }
+      else
+        _ ->
+          Repo.rollback("Error while sending money")
+      end
     end)
   end
 
@@ -321,22 +323,30 @@ defmodule PaymentServer.Accounts do
          received_value
        ) do
     Repo.transaction(fn ->
-      updated_recipient = Repo.update!(Wallet.update_value(:recipient, recipient, received_value))
-
-      updated_sender = Repo.update!(Wallet.update_value(:sender, sender, sent_value))
-
-      create_wallet_transaction!(:inbound, updated_recipient, received_value, sender.id)
-
-      create_wallet_transaction!(:outbound, updated_sender, sent_value, recipient.id)
-
-      %{
-        sender: updated_sender,
-        recipient: updated_recipient
-      }
+      with {:ok, updated_recipient} <- update_wallet_value(:recipient, recipient, received_value),
+           {:ok, updated_sender} <- update_wallet_value(:sender, sender, sent_value),
+           {:ok, _recipient_transaction} <-
+             create_wallet_transaction(:inbound, updated_recipient, received_value, sender.id),
+           {:ok, _sender_transaction} <-
+             create_wallet_transaction(:outbound, updated_sender, sent_value, recipient.id) do
+        %{
+          sender: updated_sender,
+          recipient: updated_recipient
+        }
+      else
+        _ ->
+          Repo.rollback("Error while sending money")
+      end
     end)
   end
 
-  defp create_wallet_transaction!(type, %Wallet{} = wallet, value, counterparty) do
+  defp update_wallet_value(type, wallet, value) do
+    type
+    |> Wallet.update_value(wallet, value)
+    |> Repo.update()
+  end
+
+  defp create_wallet_transaction(type, %Wallet{} = wallet, value, counterparty) do
     wallet
     |> Ecto.build_assoc(:transactions)
     |> Transaction.changeset(%{
@@ -345,7 +355,7 @@ defmodule PaymentServer.Accounts do
       balance: wallet.value,
       counterparty: counterparty
     })
-    |> Repo.insert!()
+    |> Repo.insert()
   end
 
   defp maybe_convert_currency(true, from, to, value) do
