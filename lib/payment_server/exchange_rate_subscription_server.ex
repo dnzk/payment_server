@@ -8,6 +8,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   alias __MODULE__
   use GenServer
   require Logger
+  import PaymentServer.Helpers.Macros
 
   # Client API
   def start_link(_) do
@@ -31,11 +32,7 @@ defmodule PaymentServer.ExchangeRateSubscriptionServer do
   end
 
   def reset do
-    if Application.get_env(:payment_server, :test, false) do
-      GenServer.cast(__MODULE__, {:reset_state})
-    else
-      raise "Incorrect function access"
-    end
+    run_only_in_test(GenServer.cast(__MODULE__, {:reset_state}))
   end
 
   # Server handlers
