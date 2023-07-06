@@ -4,6 +4,10 @@ defmodule PaymentServer.Helpers.Macros do
       quote do
         unquote(expression)
       end
+    else
+      quote do
+        raise "Illegal function access"
+      end
     end
   end
 end
