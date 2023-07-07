@@ -2,6 +2,7 @@
 
 PaymentServer is a backend server for bank-like entity, where users can create multiple wallets of different currencies and send money from one wallet to another.
 The API uses GraphQL with [Absinthe](https://github.com/absinthe-graphql/absinthe).
+The currency exchange provider is [Alpha Vantage](https://www.alphavantage.co/).
 
 To start your Phoenix server:
 
